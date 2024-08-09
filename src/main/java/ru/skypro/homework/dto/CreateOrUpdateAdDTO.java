@@ -3,9 +3,12 @@ package ru.skypro.homework.dto;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.Size;
+
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 @Data
+@Schema(name = "CreateOrUpdateAd")
 public class CreateOrUpdateAdDTO {
 
     @Size(min = 4, max = 32)

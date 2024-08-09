@@ -21,7 +21,7 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Operation(tags = "Authorization", operationId = "login")
+    @Operation(tags = "Authorization", operationId = "login", summary = "User Authorization")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginDTO login) {
         if (authService.login(login.getUserName(), login.getPassword())) {
@@ -31,7 +31,7 @@ public class AuthController {
         }
     }
 
-    @Operation(tags = "Authorization", operationId = "register")
+    @Operation(tags = "Registration", operationId = "register", summary = "User registration")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterDTO register) {
         if (authService.register(register)) {

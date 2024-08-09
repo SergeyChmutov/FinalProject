@@ -16,7 +16,7 @@ import java.io.IOException;
 @RequestMapping("/users")
 public class UsersController {
 
-    @Operation(tags = "Users", operationId = "setPassword")
+    @Operation(tags = "Users", operationId = "setPassword", summary = "Password update")
     @PostMapping("/set_password")
     public ResponseEntity setPassword(@RequestBody NewPasswordDTO newPassword) {
         if (false) {
@@ -26,19 +26,19 @@ public class UsersController {
         }
     }
 
-    @Operation(tags = "Users", operationId = "getUser")
+    @Operation(tags = "Users", operationId = "getUser", summary = "Getting information about an authorized user")
     @GetMapping("/me")
     public ResponseEntity<UserDTO> getUser() {
         return ResponseEntity.ok(new UserDTO());
     }
 
-    @Operation(tags = "Users", operationId = "updateUser")
+    @Operation(tags = "Users", operationId = "updateUser", summary = "Updating information about an authorized user")
     @PatchMapping("/me")
     public ResponseEntity<UpdateUserDTO> updateUser(@RequestBody UpdateUserDTO updateUser) {
         return ResponseEntity.ok(updateUser);
     }
 
-    @Operation(tags = "Users", operationId = "updateUserImage")
+    @Operation(tags = "Users", operationId = "updateUserImage", summary = "Update the avatar of an authorized user")
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity updateUserImage(@RequestParam MultipartFile image) throws IOException {
         return ResponseEntity.ok().build();
