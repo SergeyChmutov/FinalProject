@@ -7,16 +7,17 @@ import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
-@Table(name = "avatars")
+@Table(name = "images")
 @NoArgsConstructor
 @Getter
 @Setter
 @ToString
-public class UserAvatar {
+public class AdImage {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+    private String path;
     @Column(name = "file_size")
     private long fileSize;
     @Column(name = "media_type")
@@ -24,21 +25,22 @@ public class UserAvatar {
     @Lob
     @ToString.Exclude
     private byte[] data;
-    @OneToOne(mappedBy = "avatar")
-    private User user;
+    @OneToOne(mappedBy = "image")
+    private Ad ad;
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        UserAvatar that = (UserAvatar) o;
-        return fileSize == that.fileSize
-                && Objects.equals(mediaType, that.mediaType)
-                && Objects.deepEquals(data, that.data);
+        AdImage adImage = (AdImage) o;
+        return fileSize == adImage.fileSize
+                && Objects.equals(path, adImage.path)
+                && Objects.equals(mediaType, adImage.mediaType)
+                && Objects.deepEquals(data, adImage.data);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(fileSize, mediaType, Arrays.hashCode(data));
+        return Objects.hash(path, fileSize, mediaType, Arrays.hashCode(data));
     }
 }
