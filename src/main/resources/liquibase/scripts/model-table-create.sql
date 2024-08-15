@@ -1,7 +1,7 @@
 -- liquibase formatted sql
 
 -- changeset Sergey Chmutov:1
-CREATE TABLE IF NOT EXISTS avatars
+CREATE TABLE avatars
 (
     id serial NOT NULL,
     file_size bigint NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE users
 (
     id serial NOT NULL,
     email character varying(32) NOT NULL,
-    password character varying(16) NOT NULL,
+    password character varying(255) NOT NULL,
     first_name character varying(16) NOT NULL,
     last_name character varying(16) NOT NULL,
     phone character varying(25) NOT NULL,
@@ -66,7 +66,15 @@ CREATE TABLE ads
 -- changeset Sergey Chmutov:6
 CREATE TABLE comments
 (
-    id serial NOT NULL,
+    pk serial NOT NULL,
+    created_at timestamp without time zone NOT NULL,
+    text character varying(64) NOT NULL,
+    ad_id integer NOT NULL,
+    user_id integer NOT NULL,
 
-    CONSTRAINT comments_pkey PRIMARY KEY (id)
+    CONSTRAINT comments_pkey PRIMARY KEY (pk),
+    CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
+        REFERENCES users (id),
+    CONSTRAINT ad_id_fkey FOREIGN KEY (ad_id)
+        REFERENCES ads (pk)
 );

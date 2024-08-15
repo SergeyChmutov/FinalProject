@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 
 @SpringBootApplication
-@EnableWebSecurity
 @OpenAPIDefinition // http://localhost:8080/swagger-ui/index.html#/
 public class HomeworkApplication {
 
