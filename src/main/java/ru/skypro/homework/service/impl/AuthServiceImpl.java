@@ -5,6 +5,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.RegisterDTO;
 import ru.skypro.homework.service.AuthService;
 
@@ -14,8 +15,7 @@ public class AuthServiceImpl implements AuthService {
     private final UserDetailsManager manager;
     private final PasswordEncoder encoder;
 
-    public AuthServiceImpl(UserDetailsManager manager,
-                           PasswordEncoder passwordEncoder) {
+    public AuthServiceImpl(UserDetailsManager manager, PasswordEncoder passwordEncoder) {
         this.manager = manager;
         this.encoder = passwordEncoder;
     }
@@ -30,10 +30,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    @Transactional
     public boolean register(RegisterDTO register) {
         if (manager.userExists(register.getUserName())) {
             return false;
         }
+
         manager.createUser(
                 User.builder()
                         .passwordEncoder(this.encoder::encode)
@@ -41,6 +43,7 @@ public class AuthServiceImpl implements AuthService {
                         .username(register.getUserName())
                         .roles(register.getRole().name())
                         .build());
+
         return true;
     }
 

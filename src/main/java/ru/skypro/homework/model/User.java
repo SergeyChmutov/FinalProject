@@ -1,9 +1,6 @@
 package ru.skypro.homework.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import ru.skypro.homework.enums.Role;
 
 import javax.persistence.*;

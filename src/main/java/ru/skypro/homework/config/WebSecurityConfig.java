@@ -1,5 +1,6 @@
 package ru.skypro.homework.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -10,7 +11,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import ru.skypro.homework.service.impl.AdsUserDetailsService;
 
 import static org.springframework.security.config.Customizer.withDefaults;
 
@@ -19,6 +19,8 @@ import static org.springframework.security.config.Customizer.withDefaults;
 @EnableMethodSecurity
 public class WebSecurityConfig {
 
+    @Autowired
+    private AdsUserDetailsService userDetailsService;
     private static final String[] AUTH_WHITELIST = {
             "/swagger-resources/**",
             "/swagger-ui.html",
@@ -27,11 +29,6 @@ public class WebSecurityConfig {
             "/login",
             "/register"
     };
-
-    @Bean
-    public AdsUserDetailsService userDetailsService() {
-        return new AdsUserDetailsService();
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -59,7 +56,7 @@ public class WebSecurityConfig {
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
         provider.setPasswordEncoder(passwordEncoder());
-        provider.setUserDetailsService(userDetailsService());
+        provider.setUserDetailsService(userDetailsService);
 
         return provider;
     }
