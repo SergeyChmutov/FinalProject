@@ -10,7 +10,7 @@ import ru.skypro.homework.model.User;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
-        imports = { ru.skypro.homework.enums.Role.class }
+        imports = {ru.skypro.homework.enums.Role.class}
 )
 public interface UserMapper {
 
