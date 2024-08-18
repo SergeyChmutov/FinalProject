@@ -1,0 +1,48 @@
+### setPassword: Return 401 Unauthorized
+# @no-cookie-jar
+POST http://localhost:8080/users/set_password
+Content-Type: application/json
+
+{
+  "newPassword": "password",
+  "currentPassword": "password1"
+}
+
+### setPassword: Return 403 Forbidden
+# @no-cookie-jar
+POST http://localhost:8080/users/set_password
+Content-Type: application/json
+Authorization: Basic user@gmail.com password
+
+{
+  "newPassword": "password",
+  "currentPassword": "password1"
+}
+
+### getUser
+# @no-cookie-jar
+GET http://localhost:8080/users/me
+Authorization: Basic user@gmail.com password
+
+### updateUser
+# @no-cookie-jar
+PATCH http://localhost:8080/users/me
+Content-Type: application/json
+Authorization: Basic user@gmail.com password
+
+{
+  "firstName": "string",
+  "lastName": "string",
+  "phone": "+7 954)0144977"
+}
+
+### updateUserImage
+# @no-cookie-jar
+PATCH http://localhost:8080/users/me/image
+Content-Type: multipart/form-data
+Authorization: Basic user@gmail.com password
+
+Content-Disposition: form-data; name="file2"; filename="a.html"
+Content-Type: text/html
+
+<!DOCTYPE html><title>Content of a.html.</title>
