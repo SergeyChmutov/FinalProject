@@ -64,7 +64,7 @@ public class AuthController {
             ),
             responses = {
                     @ApiResponse(
-                            responseCode = "200",
+                            responseCode = "201",
                             description = "Created",
                             content = @Content(schema = @Schema(hidden = true))
                     ),
