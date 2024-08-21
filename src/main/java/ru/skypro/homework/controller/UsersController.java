@@ -1,10 +1,12 @@
 package ru.skypro.homework.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,8 @@ import ru.skypro.homework.dto.UserDTO;
 
 import java.io.IOException;
 
+@Slf4j
+@RequiredArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UsersController {
@@ -48,6 +52,8 @@ public class UsersController {
     )
     @PostMapping("/set_password")
     public ResponseEntity setPassword(@RequestBody NewPasswordDTO newPassword) {
+        log.info("New password: {}", newPassword);
+
         if (false) {
             return ResponseEntity.ok().build();
         } else {
