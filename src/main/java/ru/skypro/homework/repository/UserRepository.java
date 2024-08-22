@@ -17,4 +17,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
             nativeQuery = true
     )
     boolean existByEmail(@Param("email") String username);
+
 }

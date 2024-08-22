@@ -10,19 +10,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDTO;
 import ru.skypro.homework.dto.UpdateUserDTO;
 import ru.skypro.homework.dto.UserDTO;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.service.UserService;
+import ru.skypro.homework.model.User;
 
 import java.io.IOException;
 
 @Slf4j
-@RequiredArgsConstructor
+@AllArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UsersController {
+
+    private UserMapper userMapper;
+    private UserService userService;
 
     @Operation(
             tags = "Users",
@@ -82,8 +90,11 @@ public class UsersController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getUser() {
-        return ResponseEntity.ok(new UserDTO());
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UserDTO> getUser(Authentication authentication) {
+        User user = userService.findByEmail(authentication.getName());
+
+        return ResponseEntity.ok(userMapper.userToUserDto(user));
     }
 
     @Operation(

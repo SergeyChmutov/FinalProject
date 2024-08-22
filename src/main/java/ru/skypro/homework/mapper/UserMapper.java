@@ -6,6 +6,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.Mappings;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.skypro.homework.dto.RegisterDTO;
+import ru.skypro.homework.dto.UserDTO;
 import ru.skypro.homework.model.User;
 
 @Mapper(
@@ -20,7 +21,7 @@ public interface UserMapper {
             @Mapping(target = "image", ignore = true),
             @Mapping(target = "avatar", ignore = true)
     })
-    User RegisterDTOToUser(RegisterDTO register);
+    User registerDTOToUser(RegisterDTO register);
 
     @Mappings(value = {
             @Mapping(target = "id", constant = "0"),
@@ -29,7 +30,11 @@ public interface UserMapper {
             @Mapping(target = "lastName", constant = "lastName"),
             @Mapping(target = "phone", constant = "+7 (111) 111-11-11"),
             @Mapping(target = "role", expression = "java(Role.USER)"),
+            @Mapping(target = "image", ignore = true),
+            @Mapping(target = "avatar", ignore = true)
     })
-    User UserDetailsToUser(UserDetails userDetails);
+    User userDetailsToUser(UserDetails userDetails);
+
+    UserDTO userToUserDto(User user);
 
 }

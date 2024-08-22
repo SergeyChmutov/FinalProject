@@ -1,7 +1,6 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.AllArgsConstructor;
-import org.mapstruct.Mapping;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,7 +8,6 @@ import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.RegisterDTO;
-import ru.skypro.homework.mapper.UserMapper;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
@@ -17,11 +15,9 @@ import ru.skypro.homework.service.UserService;
 @AllArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
-    private final UserMapper userMapper;
     private final UserDetailsManager manager;
     private final PasswordEncoder encoder;
     private final UserService userService;
-
 
     @Override
     public boolean login(String userName, String password) {
