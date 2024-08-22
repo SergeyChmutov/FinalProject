@@ -35,6 +35,7 @@ public interface UserMapper {
     })
     User userDetailsToUser(UserDetails userDetails);
 
-    UserDTO userToUserDto(User user);
+    @Mapping(target = "image", constant = "/avatar/3")
+    UserDTO userToUserDTO(User user);
 
 }

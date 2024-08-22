@@ -41,4 +41,5 @@ public class UserAvatar {
     public int hashCode() {
         return Objects.hash(fileSize, mediaType, Arrays.hashCode(data));
     }
+
 }
