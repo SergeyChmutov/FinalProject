@@ -66,6 +66,11 @@ ALTER TABLE images
     ADD CONSTRAINT ad_pk_fkey FOREIGN KEY (ad_id) REFERENCES ads (pk);
 
 -- changeset Sergey Chmutov:7
+CREATE INDEX ad_id_idx
+    ON images (ad_id)
+;
+
+-- changeset Sergey Chmutov:8
 CREATE TABLE comments
 (
     pk serial NOT NULL,

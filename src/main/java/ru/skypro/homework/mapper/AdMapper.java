@@ -20,7 +20,7 @@ public interface AdMapper {
     @Mappings(value = {
             @Mapping(target = "author", expression = "java(ad.getUser().getId())"),
             @Mapping(target = "image", expression = """
-                    java("/image/" + ad.getPk())
+                    java("/images/" + ad.getPk())
                     """)
     })
     AdDTO adToAdDTO(Ad ad);

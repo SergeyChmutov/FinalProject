@@ -17,6 +17,7 @@ import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -40,6 +41,11 @@ public class AdsServiceImpl implements AdsService {
         adImageService.createAdImage(createdAd, image);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(adMapper.adToAdDTO(createdAd));
+    }
+
+    @Override
+    public List<Ad> getAllAds() {
+        return adRepository.findAll();
     }
 
 }

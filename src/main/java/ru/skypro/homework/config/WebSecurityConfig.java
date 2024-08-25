@@ -39,7 +39,7 @@ public class WebSecurityConfig {
                                 authorization
                                         .mvcMatchers(AUTH_WHITELIST)
                                         .permitAll()
-                                        .mvcMatchers("/ads/**", "/users/**", "/avatars/**")
+                                        .mvcMatchers("/users/**", "/avatars/**")
                                         .authenticated())
                 .cors()
                 .and()

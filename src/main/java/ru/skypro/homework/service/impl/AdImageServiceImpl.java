@@ -1,16 +1,17 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpStatus;
-import org.springframework.remoting.httpinvoker.HttpInvokerProxyFactoryBean;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.exception.AdsImageFileNotFoundException;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.AdImage;
-import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdImageRepository;
 import ru.skypro.homework.service.AdImageService;
 
@@ -24,10 +25,9 @@ import static java.nio.file.StandardOpenOption.CREATE_NEW;
 @Service
 @RequiredArgsConstructor
 public class AdImageServiceImpl implements AdImageService {
+    private final AdImageRepository adImageRepository;
     @Value("${path.to.adimage.folder}")
     private String imagesFolder;
-
-    private final AdImageRepository adImageRepository;
 
     @Override
     public AdImage createAdImage(Ad ad, MultipartFile image) throws IOException {
@@ -63,8 +63,9 @@ public class AdImageServiceImpl implements AdImageService {
         return adImageRepository.save(image);
     }
 
-    private void downloadAvatarFromFile(Integer id, HttpServletResponse response) throws IOException {
-        AdImage adImage = adImageRepository.findById(id)
+    @Override
+    public void getAdImage(Integer id, HttpServletResponse response) throws IOException {
+        AdImage adImage = adImageRepository.findByAd_Pk(id)
                 .orElseThrow(() -> new AdsImageFileNotFoundException("Image of ad with id " + id + " not found"));
         Path path = Path.of(adImage.getPath());
 

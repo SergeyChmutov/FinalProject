@@ -9,8 +9,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "ads")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Ad {
 
     @Id

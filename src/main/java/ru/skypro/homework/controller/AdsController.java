@@ -23,10 +23,12 @@ import ru.skypro.homework.service.AdsService;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 @RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 @RequestMapping("/ads")
 public class AdsController {
 
@@ -49,12 +51,16 @@ public class AdsController {
     @GetMapping
     @PreAuthorize("permitAll()")
     public ResponseEntity<AdsDTO> getAllAds() {
-        AdsDTO ads = AdsDTO.builder()
-                .count(0)
-                .results(List.of())
-                .build();
+        List<AdDTO> ads = adsService.getAllAds().stream()
+                .map(adMapper::adToAdDTO)
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(ads);
+        return ResponseEntity.ok(
+                AdsDTO.builder()
+                        .count(ads.size())
+                        .results(ads)
+                        .build()
+        );
     }
 
     @Operation(
