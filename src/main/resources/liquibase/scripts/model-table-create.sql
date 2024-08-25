@@ -30,11 +30,17 @@ CREATE TABLE users
 );
 
 -- changeset Sergey Chmutov:3
-ALTER TABLE users
-    ADD CONSTRAINT email_unique UNIQUE (email)
+CREATE INDEX email_idx
+    ON users (email)
 ;
 
 -- changeset Sergey Chmutov:4
+ALTER TABLE avatars
+    ADD CONSTRAINT user_id_fkey FOREIGN KEY (id)
+        REFERENCES users (id)
+;
+
+-- changeset Sergey Chmutov:5
 CREATE TABLE images
 (
     id serial NOT NULL,
@@ -46,7 +52,7 @@ CREATE TABLE images
     CONSTRAINT images_pkey PRIMARY KEY (id)
 );
 
--- changeset Sergey Chmutov:5
+-- changeset Sergey Chmutov:6
 CREATE TABLE ads
 (
     pk serial NOT NULL,
@@ -63,7 +69,7 @@ CREATE TABLE ads
         REFERENCES images (id)
 );
 
--- changeset Sergey Chmutov:6
+-- changeset Sergey Chmutov:7
 CREATE TABLE comments
 (
     pk serial NOT NULL,

@@ -9,9 +9,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "avatars")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
-@ToString
+@Builder
 public class UserAvatar {
 
     @Id
@@ -24,7 +25,7 @@ public class UserAvatar {
     @Lob
     @ToString.Exclude
     private byte[] data;
-    @OneToOne(mappedBy = "avatar")
+    @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY)
     private User user;
 
     @Override
@@ -40,6 +41,17 @@ public class UserAvatar {
     @Override
     public int hashCode() {
         return Objects.hash(fileSize, mediaType, Arrays.hashCode(data));
+    }
+
+    @Override
+    public String toString() {
+        return "UserAvatar{" +
+                "id=" + id +
+                ", fileSize=" + fileSize +
+                ", mediaType='" + mediaType + '\'' +
+                ", hashCode(data)=" + Arrays.hashCode(data) +
+                ", user=" + user +
+                '}';
     }
 
 }

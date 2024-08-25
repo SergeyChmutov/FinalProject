@@ -26,7 +26,7 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String image;
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "avatar_id", referencedColumnName = "id")
     private UserAvatar avatar;
 

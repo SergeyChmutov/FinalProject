@@ -152,7 +152,12 @@ public class UsersController {
             }
     )
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity updateUserImage(@RequestParam MultipartFile image) throws IOException {
+    public ResponseEntity updateUserImage(
+            @RequestParam MultipartFile image,
+            Authentication authentication
+    ) throws IOException {
+        userAvatarService.saveUserAvatar(authentication.getName(), image);
+
         return ResponseEntity.ok().build();
     }
 

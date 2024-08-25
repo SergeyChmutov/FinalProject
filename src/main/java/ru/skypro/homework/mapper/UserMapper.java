@@ -11,7 +11,9 @@ import ru.skypro.homework.model.User;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
-        imports = {ru.skypro.homework.enums.Role.class}
+        imports = {ru.skypro.homework.enums.Role.class,
+                ru.skypro.homework.model.UserAvatar.class
+        }
 )
 public interface UserMapper {
 
@@ -35,7 +37,6 @@ public interface UserMapper {
     })
     User userDetailsToUser(UserDetails userDetails);
 
-    @Mapping(target = "image", constant = "/avatar/3")
     UserDTO userToUserDTO(User user);
 
 }
