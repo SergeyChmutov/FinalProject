@@ -20,8 +20,7 @@ public interface UserMapper {
     @Mappings(value = {
             @Mapping(target = "id", ignore = true),
             @Mapping(target = "email", source = "userName"),
-            @Mapping(target = "image", ignore = true),
-            @Mapping(target = "avatar", ignore = true)
+            @Mapping(target = "image", ignore = true)
     })
     User registerDTOToUser(RegisterDTO register);
 
@@ -32,8 +31,7 @@ public interface UserMapper {
             @Mapping(target = "lastName", constant = "lastName"),
             @Mapping(target = "phone", constant = "+7 (111) 111-11-11"),
             @Mapping(target = "role", expression = "java(Role.USER)"),
-            @Mapping(target = "image", ignore = true),
-            @Mapping(target = "avatar", ignore = true)
+            @Mapping(target = "image", ignore = true)
     })
     User userDetailsToUser(UserDetails userDetails);
 

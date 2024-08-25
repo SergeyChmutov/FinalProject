@@ -3,15 +3,18 @@ package ru.skypro.homework.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.awt.*;
 import java.util.Arrays;
 import java.util.Objects;
 
 @Entity
 @Table(name = "images")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
 @ToString
+@Builder
 public class AdImage {
 
     @Id
@@ -22,10 +25,8 @@ public class AdImage {
     private long fileSize;
     @Column(name = "media_type")
     private String mediaType;
-    @Lob
-    @ToString.Exclude
-    private byte[] data;
-    @OneToOne(mappedBy = "image")
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "ad_id")
     private Ad ad;
 
     @Override
@@ -35,12 +36,11 @@ public class AdImage {
         AdImage adImage = (AdImage) o;
         return fileSize == adImage.fileSize
                 && Objects.equals(path, adImage.path)
-                && Objects.equals(mediaType, adImage.mediaType)
-                && Objects.deepEquals(data, adImage.data);
+                && Objects.equals(mediaType, adImage.mediaType);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(path, fileSize, mediaType, Arrays.hashCode(data));
+        return Objects.hash(path, fileSize, mediaType);
     }
 }

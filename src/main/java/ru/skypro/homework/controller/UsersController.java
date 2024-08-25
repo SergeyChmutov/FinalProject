@@ -161,34 +161,4 @@ public class UsersController {
         return ResponseEntity.ok().build();
     }
 
-    @Operation(
-            tags = "Users",
-            operationId = "getUserImage",
-            summary = "Gets user avatar",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "OK",
-                            content = @Content(
-                                    mediaType = MediaType.APPLICATION_OCTET_STREAM_VALUE,
-                                    array = @ArraySchema(schema = @Schema(implementation = byte.class))
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "Unauthorized",
-                            content = @Content(schema = @Schema(hidden = true))
-                    ),
-                    @ApiResponse(
-                            responseCode = "404",
-                            description = "Not found",
-                            content = @Content(schema = @Schema(hidden = true))
-                    )
-            }
-    )
-    @GetMapping("/me/image")
-    public ResponseEntity<byte[]> getUserAvatar(Authentication authentication) {
-        return userAvatarService.getUserAvatar(authentication.getName());
-    }
-
 }

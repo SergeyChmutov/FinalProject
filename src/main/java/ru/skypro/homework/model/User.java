@@ -1,6 +1,9 @@
 package ru.skypro.homework.model;
 
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 import ru.skypro.homework.enums.Role;
 
 import javax.persistence.*;
@@ -26,9 +29,6 @@ public class User {
     @Enumerated(EnumType.STRING)
     private Role role;
     private String image;
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JoinColumn(name = "avatar_id", referencedColumnName = "id")
-    private UserAvatar avatar;
 
     @Override
     public boolean equals(Object o) {
@@ -42,4 +42,5 @@ public class User {
     public int hashCode() {
         return Objects.hashCode(email);
     }
+
 }

@@ -4,6 +4,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import ru.skypro.homework.model.Ad;
 
+import java.util.Optional;
+
 @Repository
 public interface AdRepository extends JpaRepository<Ad, Integer> {
+
+    Optional<Ad> findById(Integer id);
+
+
 }

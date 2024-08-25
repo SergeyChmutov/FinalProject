@@ -27,9 +27,9 @@ public class UserAvatarServiceImpl implements UserAvatarService {
     private final UserRepository userRepository;
 
     @Override
-    public ResponseEntity<byte[]> getUserAvatar(String username) {
-        UserAvatar avatar = userAvatarRepository.findByUser_Email(username)
-                .orElseThrow(() -> new AdsAvatarNotFoundException("Image for user with name " + username + " not found"));
+    public ResponseEntity<byte[]> getUserAvatar(Integer id) {
+        UserAvatar avatar = userAvatarRepository.findById(id)
+                .orElseThrow(() -> new AdsAvatarNotFoundException("User avatar for id " + id + " not found"));
         HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.parseMediaType(avatar.getMediaType()));
@@ -53,7 +53,7 @@ public class UserAvatarServiceImpl implements UserAvatarService {
         userAvatarRepository.save(avatar);
 
         if (user.getImage() == null || user.getImage().isBlank()) {
-            user.setImage("/avatar/" + avatar.getId());
+            user.setImage("/avatars/" + avatar.getId());
             userRepository.save(user);
         }
     }

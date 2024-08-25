@@ -10,7 +10,7 @@ import java.io.IOException;
 @Service
 public interface UserAvatarService {
 
-    ResponseEntity<byte[]> getUserAvatar(String username);
+    ResponseEntity<byte[]> getUserAvatar(Integer id);
 
     void saveUserAvatar(String username, MultipartFile image) throws IOException;
 

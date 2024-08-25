@@ -25,7 +25,7 @@ public class UserAvatar {
     @Lob
     @ToString.Exclude
     private byte[] data;
-    @OneToOne(mappedBy = "avatar", fetch = FetchType.LAZY)
+    @OneToOne
     private User user;
 
     @Override

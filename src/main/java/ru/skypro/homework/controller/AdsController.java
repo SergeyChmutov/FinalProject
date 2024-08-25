@@ -6,14 +6,19 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.enums.Role;
+import ru.skypro.homework.mapper.AdMapper;
+import ru.skypro.homework.service.AdsService;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -21,8 +26,12 @@ import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/ads")
 public class AdsController {
+
+    private final AdsService adsService;
+    private final AdMapper adMapper;
 
     @Operation(
             tags = "Ads",
@@ -38,6 +47,7 @@ public class AdsController {
             )
     )
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<AdsDTO> getAllAds() {
         AdsDTO ads = AdsDTO.builder()
                 .count(0)
@@ -71,19 +81,13 @@ public class AdsController {
             }
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AdDTO> addAd(
             @RequestPart MultipartFile image,
-            @RequestPart(name = "properties") CreateOrUpdateAdDTO ad
+            @RequestPart(name = "properties") CreateOrUpdateAdDTO ad,
+            Authentication authentication
     ) throws IOException {
-        AdDTO createdAd = AdDTO.builder()
-                .author(0)
-                .image("")
-                .pk(0)
-                .price(ad.getPrice())
-                .title(ad.getTitle())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAd);
+        return adsService.addAd(ad, authentication.getName(), image);
     }
 
     @Operation(
@@ -517,7 +521,7 @@ public class AdsController {
             }
     )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> updateUserImage(
+    public ResponseEntity<byte[]> updateAdImage(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
             @RequestParam MultipartFile image
     ) throws IOException {
