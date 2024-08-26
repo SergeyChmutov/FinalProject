@@ -97,15 +97,6 @@ paths:
         '400':
           description: Bad Request
   /login:
-    get:
-      description: New endpoint
-      responses:
-        200:
-          description: New response
-          content:
-            application/json:
-              schema:
-                : 
     post:
       tags:
         - Авторизация
@@ -187,6 +178,7 @@ paths:
           description: Unauthorized
         '404':
           description: Not found
+
     post:
       tags:
         - Комментарии

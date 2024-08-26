@@ -30,6 +30,4 @@ public interface AdsService {
 
     ResponseEntity<byte[]> updateAdImageById(Integer id, MultipartFile image, String username) throws IOException;
 
-    HttpStatus deleteAdCommentByItsId(Integer adId, Integer commentId, String username);
-
 }

@@ -3,6 +3,7 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDTO;
 import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.exception.AdsCommentNotFoundException;
@@ -46,19 +47,30 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
+    @Transactional
     public HttpStatus deleteAdCommentByItsId(Integer adId, Integer commentId, String username) {
         Ad foundAd = adsService.getAdById(adId);
-        User foundUser = userService.findUserByEmail(username);
         Comment foundComment = findCommentById(commentId);
 
+        if (!foundComment.getAd().equals(foundAd)) {
+            return HttpStatus.NOT_FOUND;
+        }
+
+        User foundUser = userService.findUserByEmail(username);
         Role userRole = foundUser.getRole();
         boolean isCommentAuthor = (foundComment.getUser() == foundUser);
-        boolean userHasPermit = isCommentAuthor || userRole == Role.ADMIN;
+        boolean userHasPermit = (isCommentAuthor || userRole == Role.ADMIN);
 
+        if (userHasPermit) {
+            commentRepository.delete(commentId);
+            return HttpStatus.OK;
+        } else {
+            return HttpStatus.FORBIDDEN;
+        }
     }
 
     private Comment findCommentById(Integer id) {
-        return commentRepository.findById(id)
+        return commentRepository.findByPk(id)
                 .orElseThrow(() -> new AdsCommentNotFoundException("Comment with id " + id + " not found."));
     }
 }
