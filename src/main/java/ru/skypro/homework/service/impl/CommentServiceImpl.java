@@ -1,8 +1,11 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDTO;
+import ru.skypro.homework.enums.Role;
+import ru.skypro.homework.exception.AdsCommentNotFoundException;
 import ru.skypro.homework.mapper.CommentMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
@@ -42,4 +45,20 @@ public class CommentServiceImpl implements CommentService {
         return commentRepository.save(newComment);
     }
 
+    @Override
+    public HttpStatus deleteAdCommentByItsId(Integer adId, Integer commentId, String username) {
+        Ad foundAd = adsService.getAdById(adId);
+        User foundUser = userService.findUserByEmail(username);
+        Comment foundComment = findCommentById(commentId);
+
+        Role userRole = foundUser.getRole();
+        boolean isCommentAuthor = (foundComment.getUser() == foundUser);
+        boolean userHasPermit = isCommentAuthor || userRole == Role.ADMIN;
+
+    }
+
+    private Comment findCommentById(Integer id) {
+        return commentRepository.findById(id)
+                .orElseThrow(() -> new AdsCommentNotFoundException("Comment with id " + id + " not found."));
+    }
 }

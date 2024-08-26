@@ -312,7 +312,8 @@ public class AdsController {
     @DeleteMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<?> deleteComment(
             @Parameter(name = "adId", description = "Identifier of ad") @PathVariable Integer adId,
-            @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId
+            @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId,
+            Authentication authentication
     ) {
         if (adId <= 0 || commentId <= 0) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -333,6 +334,7 @@ public class AdsController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+
     }
 
     @Operation(
