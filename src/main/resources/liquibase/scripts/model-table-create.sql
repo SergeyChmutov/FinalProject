@@ -59,11 +59,15 @@ CREATE TABLE ads
     CONSTRAINT ads_pkey PRIMARY KEY (pk),
     CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
         REFERENCES users (id)
+        ON DELETE CASCADE
 );
 
 -- changeset Sergey Chmutov:6
 ALTER TABLE images
-    ADD CONSTRAINT ad_pk_fkey FOREIGN KEY (ad_id) REFERENCES ads (pk);
+    ADD CONSTRAINT ad_pk_fkey FOREIGN KEY (ad_id)
+        REFERENCES ads (pk)
+        ON DELETE CASCADE
+;
 
 -- changeset Sergey Chmutov:7
 CREATE INDEX ad_id_idx
@@ -81,7 +85,9 @@ CREATE TABLE comments
 
     CONSTRAINT comments_pkey PRIMARY KEY (pk),
     CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES users (id),
+        REFERENCES users (id)
+        ON DELETE CASCADE,
     CONSTRAINT ad_id_fkey FOREIGN KEY (ad_id)
         REFERENCES ads (pk)
+        ON DELETE CASCADE
 );

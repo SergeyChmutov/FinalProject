@@ -237,27 +237,10 @@ public class AdsController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeAd(
-            @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id
+            @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
+            Authentication authentication
     ) {
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-
-        boolean adExist = true;
-
-        if (adExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorAd = false;
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return ResponseEntity.status(adsService.deleteAdById(id, authentication)).build();
     }
 
     @Operation(

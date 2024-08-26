@@ -3,12 +3,15 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.CreateOrUpdateAdDTO;
 import ru.skypro.homework.dto.ExtendedAdDTO;
+import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.exception.AdsAdNotFoundException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
@@ -76,6 +79,30 @@ public class AdsServiceImpl implements AdsService {
                 .orElseThrow(() -> new AdsAdNotFoundException("Ad with id " + id + " not found."));
 
         return ad;
+    }
+
+    @Override
+    @Transactional
+    public HttpStatus deleteAdById(Integer id, Authentication authentication) {
+        try {
+            User user = userService.findUserByEmail(authentication.getName());
+            Ad ad = getAdById(id);
+
+            Role userRole = user.getRole();
+            boolean isAuthorAd = (ad.getUser() == user);
+            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
+
+            if (userHasPermit) {
+                adRepository.delete(id);
+                return HttpStatus.OK;
+            } else {
+                return HttpStatus.FORBIDDEN;
+            }
+        } catch (UsernameNotFoundException e) {
+            return HttpStatus.NO_CONTENT;
+        } catch (AdsAdNotFoundException e) {
+            return HttpStatus.NOT_FOUND;
+        }
     }
 
 }

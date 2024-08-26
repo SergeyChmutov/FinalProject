@@ -1,6 +1,8 @@
 package ru.skypro.homework.service;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.CommentsDTO;
@@ -24,4 +26,5 @@ public interface AdsService {
 
     Ad getAdById(Integer id);
 
+    HttpStatus deleteAdById(Integer id, Authentication authentication);
 }
