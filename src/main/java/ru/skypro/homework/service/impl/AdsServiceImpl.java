@@ -1,7 +1,9 @@
 package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -15,6 +17,7 @@ import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.exception.AdsAdNotFoundException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
+import ru.skypro.homework.model.AdImage;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdImageService;
@@ -102,6 +105,52 @@ public class AdsServiceImpl implements AdsService {
             return HttpStatus.NO_CONTENT;
         } catch (AdsAdNotFoundException e) {
             return HttpStatus.NOT_FOUND;
+        }
+    }
+
+    @Override
+    public ResponseEntity<AdDTO> updateAdById(Integer id, CreateOrUpdateAdDTO ad, String username) {
+        Ad foundedAd = getAdById(id);
+        User user = userService.findUserByEmail(username);
+
+        Role userRole = user.getRole();
+        boolean isAuthorAd = (foundedAd.getUser() == user);
+        boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
+
+        if (userHasPermit) {
+            Ad adFromAdDTO = adMapper.createOrUpdateAdDTOToAd(ad);
+
+            foundedAd.setPrice(adFromAdDTO.getPrice());
+            foundedAd.setDescription(adFromAdDTO.getDescription());
+            foundedAd.setTitle(adFromAdDTO.getTitle());
+
+            Ad updatedAd = adRepository.save(foundedAd);
+
+            return ResponseEntity.ok(adMapper.adToAdDTO(updatedAd));
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
+    @Override
+    public ResponseEntity<byte[]> updateAdImageById(Integer id, MultipartFile image, String username) throws IOException {
+        Ad foundedAd = getAdById(id);
+        User user = userService.findUserByEmail(username);
+
+        Role userRole = user.getRole();
+        boolean isAuthorAd = (foundedAd.getUser() == user);
+        boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
+
+        if (userHasPermit) {
+            AdImage updatedImage = adImageService.createAdImage(foundedAd, image);
+            HttpHeaders headers = new HttpHeaders();
+
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentLength(image.getSize());
+
+            return ResponseEntity.status(HttpStatus.OK).headers(headers).body(image.getBytes());
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
     }
 

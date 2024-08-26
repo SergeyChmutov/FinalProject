@@ -276,31 +276,10 @@ public class AdsController {
     @PatchMapping("/{id}")
     public ResponseEntity<AdDTO> updateAds(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
-            @RequestBody CreateOrUpdateAdDTO ad
+            @RequestBody CreateOrUpdateAdDTO ad,
+            Authentication authentication
     ) {
-        boolean adExist = true;
-
-        if (adExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorAd = false;
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                AdDTO editedAd = AdDTO.builder()
-                        .author(0)
-                        .image("")
-                        .pk(0)
-                        .price(ad.getPrice())
-                        .title(ad.getTitle())
-                        .build();
-
-                return ResponseEntity.ok(editedAd);
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return adsService.updateAdById(id, ad, authentication.getName());
     }
 
     @Operation(
@@ -489,28 +468,10 @@ public class AdsController {
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<byte[]> updateAdImage(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
-            @RequestParam MultipartFile image
+            @RequestParam MultipartFile image,
+            Authentication authentication
     ) throws IOException {
-        boolean adExist = true;
-
-        if (adExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorAd = false;
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                HttpHeaders headers = new HttpHeaders();
-
-                headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-                headers.setContentLength(image.getSize());
-
-                return ResponseEntity.status(HttpStatus.OK).headers(headers).body(image.getBytes());
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return adsService.updateAdImageById(id, image, authentication.getName());
     }
 
 }
