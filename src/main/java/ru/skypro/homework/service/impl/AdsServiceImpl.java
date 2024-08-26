@@ -32,7 +32,7 @@ public class AdsServiceImpl implements AdsService {
     @Transactional
     public ResponseEntity<AdDTO> addAd(CreateOrUpdateAdDTO ad, String username, MultipartFile image) throws IOException {
         Ad adFromAdDTO = adMapper.createOrUpdateAdDTOToAd(ad);
-        User user = userService.findByEmail(username);
+        User user = userService.findUserByEmail(username);
 
         adFromAdDTO.setUser(user);
 
@@ -48,4 +48,9 @@ public class AdsServiceImpl implements AdsService {
         return adRepository.findAll();
     }
 
+    @Override
+    public List<Ad> getUsersAds(String username) {
+        User user = userService.findUserByEmail(username);
+        return adRepository.findAllByUser(user);
+    }
 }

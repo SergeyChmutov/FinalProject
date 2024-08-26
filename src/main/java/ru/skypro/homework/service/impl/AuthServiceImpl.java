@@ -43,13 +43,13 @@ public class AuthServiceImpl implements AuthService {
                         .roles(register.getRole().name())
                         .build());
 
-        ru.skypro.homework.model.User createdUser = userService.findByEmail(register.getUserName());
+        ru.skypro.homework.model.User createdUser = userService.findUserByEmail(register.getUserName());
 
         createdUser.setFirstName(register.getFirstName());
         createdUser.setLastName(register.getLastName());
         createdUser.setPhone(register.getPhone());
 
-        userService.save(createdUser);
+        userService.saveUser(createdUser);
 
         return true;
     }

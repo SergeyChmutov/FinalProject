@@ -87,7 +87,6 @@ public class AdsController {
             }
     )
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("isAuthenticated()")
     public ResponseEntity<AdDTO> addAd(
             @RequestPart MultipartFile image,
             @RequestPart(name = "properties") CreateOrUpdateAdDTO ad,
@@ -485,15 +484,17 @@ public class AdsController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<AdsDTO> getAdsMe() {
-        List<AdDTO> usersAds = List.of();
+    public ResponseEntity<AdsDTO> getAdsMe(Authentication authentication) {
+        List<AdDTO> ads = adsService.getUsersAds(authentication.getName()).stream()
+                .map(adMapper::adToAdDTO)
+                .collect(Collectors.toList());
 
-        AdsDTO ads = AdsDTO.builder()
-                .count(usersAds.size())
-                .results(usersAds)
-                .build();
-
-        return ResponseEntity.ok(ads);
+        return ResponseEntity.ok(
+                AdsDTO.builder()
+                        .count(ads.size())
+                        .results(ads)
+                        .build()
+        );
     }
 
     @Operation(

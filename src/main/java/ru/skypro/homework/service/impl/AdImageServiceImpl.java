@@ -65,7 +65,10 @@ public class AdImageServiceImpl implements AdImageService {
 
     @Override
     public void getAdImage(Integer id, HttpServletResponse response) throws IOException {
-        AdImage adImage = adImageRepository.findByAd_Pk(id)
+        Ad ad = Ad.builder()
+                .pk(id)
+                .build();
+        AdImage adImage = adImageRepository.findByAd(ad)
                 .orElseThrow(() -> new AdsImageFileNotFoundException("Image of ad with id " + id + " not found"));
         Path path = Path.of(adImage.getPath());
 

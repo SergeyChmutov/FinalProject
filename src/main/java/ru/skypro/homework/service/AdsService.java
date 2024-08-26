@@ -15,4 +15,5 @@ public interface AdsService {
 
     List<Ad> getAllAds();
 
+    List<Ad> getUsersAds(String username);
 }

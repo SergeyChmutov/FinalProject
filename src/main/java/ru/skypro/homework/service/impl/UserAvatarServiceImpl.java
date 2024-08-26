@@ -41,7 +41,7 @@ public class UserAvatarServiceImpl implements UserAvatarService {
     @Override
     @Transactional
     public void saveUserAvatar(String username, MultipartFile image) throws IOException {
-        User user = userService.findByEmail(username);
+        User user = userService.findUserByEmail(username);
         final UserAvatar avatar = userAvatarRepository.findByUser(user)
                 .orElseGet(UserAvatar::new);
 

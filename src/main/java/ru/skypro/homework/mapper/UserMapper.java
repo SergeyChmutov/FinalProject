@@ -6,6 +6,7 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.Mappings;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.skypro.homework.dto.RegisterDTO;
+import ru.skypro.homework.dto.UpdateUserDTO;
 import ru.skypro.homework.dto.UserDTO;
 import ru.skypro.homework.model.User;
 
@@ -36,5 +37,14 @@ public interface UserMapper {
     User userDetailsToUser(UserDetails userDetails);
 
     UserDTO userToUserDTO(User user);
+
+    @Mappings(value = {
+            @Mapping(target = "id", ignore = true),
+            @Mapping(target = "email", ignore = true),
+            @Mapping(target = "password", ignore = true),
+            @Mapping(target = "role", ignore = true),
+            @Mapping(target = "image", ignore = true)
+    })
+    User updateUserDTOToUser(UpdateUserDTO userDTO);
 
 }
