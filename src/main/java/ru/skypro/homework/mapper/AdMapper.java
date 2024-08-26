@@ -6,7 +6,9 @@ import org.mapstruct.MappingConstants;
 import org.mapstruct.Mappings;
 import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.CreateOrUpdateAdDTO;
+import ru.skypro.homework.dto.ExtendedAdDTO;
 import ru.skypro.homework.model.Ad;
+import ru.skypro.homework.model.AdImage;
 
 @Mapper(
         componentModel = MappingConstants.ComponentModel.SPRING,
@@ -26,5 +28,15 @@ public interface AdMapper {
     AdDTO adToAdDTO(Ad ad);
 
     Ad createOrUpdateAdDTOToAd(CreateOrUpdateAdDTO adDTO);
+
+    @Mappings(value = {
+            @Mapping(target = "authorFirstName", expression = "java(ad.getUser().getFirstName())"),
+            @Mapping(target = "authorLastName", expression = "java(ad.getUser().getLastName())"),
+            @Mapping(target = "email", expression = "java(ad.getUser().getEmail())"),
+            @Mapping(target = "image", expression = """
+                    java("/images/" + ad.getPk())
+                    """)
+    })
+    ExtendedAdDTO adToExtendedAdDTO(Ad ad);
 
 }

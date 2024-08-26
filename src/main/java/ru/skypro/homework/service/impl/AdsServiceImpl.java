@@ -8,6 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.AdDTO;
 import ru.skypro.homework.dto.CreateOrUpdateAdDTO;
+import ru.skypro.homework.dto.ExtendedAdDTO;
+import ru.skypro.homework.exception.AdsAdNotFoundException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.User;
@@ -18,6 +20,7 @@ import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -53,4 +56,26 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.findUserByEmail(username);
         return adRepository.findAllByUser(user);
     }
+
+    @Override
+    public ResponseEntity<ExtendedAdDTO> getExtendedAdInfo(Integer id) {
+        Optional<Ad> ad = adRepository.findById(id);
+
+        if (ad.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        ExtendedAdDTO extendedAd = adMapper.adToExtendedAdDTO(ad.get());
+
+        return ResponseEntity.ok(extendedAd);
+    }
+
+    @Override
+    public Ad getAdById(Integer id) {
+        Ad ad = adRepository.findById(id)
+                .orElseThrow(() -> new AdsAdNotFoundException("Ad with id " + id + " not found."));
+
+        return ad;
+    }
+
 }

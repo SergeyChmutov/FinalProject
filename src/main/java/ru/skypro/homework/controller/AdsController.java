@@ -18,7 +18,11 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
 import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.mapper.AdMapper;
+import ru.skypro.homework.mapper.CommentMapper;
+import ru.skypro.homework.model.Ad;
+import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 
 import java.io.IOException;
 import java.util.Calendar;
@@ -33,7 +37,9 @@ import java.util.stream.Collectors;
 public class AdsController {
 
     private final AdsService adsService;
+    private final CommentService commentService;
     private final AdMapper adMapper;
+    private final CommentMapper commentMapper;
 
     @Operation(
             tags = "Ads",
@@ -124,18 +130,14 @@ public class AdsController {
     public ResponseEntity<CommentsDTO> getComments(
             @Parameter(name = "id", description = "identifier of ad") @PathVariable Integer id
     ) {
-        List<CommentDTO> comments = List.of();
+        List<CommentDTO> adCommentsDTO = commentService.getAllCommentsByAdId(id).stream()
+                .map(commentMapper::commentToCommentDTO)
+                .collect(Collectors.toList());
 
-        if (comments.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } else {
-            CommentsDTO result = CommentsDTO.builder()
-                    .count(comments.size())
-                    .results(comments)
-                    .build();
-
-            return ResponseEntity.ok(result);
-        }
+        return ResponseEntity.ok(CommentsDTO.builder()
+                .count(adCommentsDTO.size())
+                .results(adCommentsDTO)
+                .build());
     }
 
     @Operation(
@@ -166,22 +168,12 @@ public class AdsController {
     @PostMapping("/{id}/comments")
     public ResponseEntity<CommentDTO> addComment(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
-            @RequestBody CreateOrUpdateCommentDTO comment
+            @RequestBody CreateOrUpdateCommentDTO comment,
+            Authentication authentication
     ) {
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Comment addedComment = commentService.addCommentToAdByItsId(id, authentication.getName(), comment);
 
-        CommentDTO addedComment = CommentDTO.builder()
-                .author(id)
-                .authorImage("")
-                .authorFirstName("")
-                .createdAt(Calendar.getInstance().getTimeInMillis())
-                .pk(0)
-                .text(comment.getText())
-                .build();
-
-        return ResponseEntity.ok(addedComment);
+        return ResponseEntity.ok(commentMapper.commentToCommentDTO(addedComment));
     }
 
     @Operation(
@@ -213,23 +205,7 @@ public class AdsController {
     public ResponseEntity<ExtendedAdDTO> getAds(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id
     ) {
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        ExtendedAdDTO foundedAd = ExtendedAdDTO.builder()
-                .pk(0)
-                .authorFirstName("")
-                .authorLastName("")
-                .description("")
-                .email("")
-                .image("")
-                .phone("")
-                .price(0)
-                .title("")
-                .build();
-
-        return ResponseEntity.ok(foundedAd);
+        return adsService.getExtendedAdInfo(id);
     }
 
     @Operation(
