@@ -6,22 +6,35 @@ import io.swagger.v3.oas.annotations.media.ArraySchema;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.enums.Role;
+import ru.skypro.homework.mapper.AdMapper;
+import ru.skypro.homework.mapper.CommentMapper;
+import ru.skypro.homework.model.Comment;
+import ru.skypro.homework.service.AdsService;
+import ru.skypro.homework.service.CommentService;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
+@RequiredArgsConstructor
+@PreAuthorize("isAuthenticated()")
 @RequestMapping("/ads")
 public class AdsController {
+
+    private final AdsService adsService;
+    private final CommentService commentService;
+    private final AdMapper adMapper;
+    private final CommentMapper commentMapper;
 
     @Operation(
             tags = "Ads",
@@ -37,13 +50,18 @@ public class AdsController {
             )
     )
     @GetMapping
+    @PreAuthorize("permitAll()")
     public ResponseEntity<AdsDTO> getAllAds() {
-        AdsDTO ads = AdsDTO.builder()
-                .count(0)
-                .results(List.of())
-                .build();
+        List<AdDTO> ads = adsService.getAllAds().stream()
+                .map(adMapper::adToAdDTO)
+                .collect(Collectors.toList());
 
-        return ResponseEntity.ok(ads);
+        return ResponseEntity.ok(
+                AdsDTO.builder()
+                        .count(ads.size())
+                        .results(ads)
+                        .build()
+        );
     }
 
     @Operation(
@@ -72,17 +90,10 @@ public class AdsController {
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<AdDTO> addAd(
             @RequestPart MultipartFile image,
-            @RequestPart(name = "properties") CreateOrUpdateAdDTO ad
+            @RequestPart(name = "properties") CreateOrUpdateAdDTO ad,
+            Authentication authentication
     ) throws IOException {
-        AdDTO createdAd = AdDTO.builder()
-                .author(0)
-                .image("")
-                .pk(0)
-                .price(ad.getPrice())
-                .title(ad.getTitle())
-                .build();
-
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdAd);
+        return adsService.addAd(ad, authentication.getName(), image);
     }
 
     @Operation(
@@ -114,18 +125,14 @@ public class AdsController {
     public ResponseEntity<CommentsDTO> getComments(
             @Parameter(name = "id", description = "identifier of ad") @PathVariable Integer id
     ) {
-        List<CommentDTO> comments = List.of();
+        List<CommentDTO> adCommentsDTO = commentService.getAllCommentsByAdId(id).stream()
+                .map(commentMapper::commentToCommentDTO)
+                .collect(Collectors.toList());
 
-        if (comments.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        } else {
-            CommentsDTO result = CommentsDTO.builder()
-                    .count(comments.size())
-                    .results(comments)
-                    .build();
-
-            return ResponseEntity.ok(result);
-        }
+        return ResponseEntity.ok(CommentsDTO.builder()
+                .count(adCommentsDTO.size())
+                .results(adCommentsDTO)
+                .build());
     }
 
     @Operation(
@@ -156,22 +163,12 @@ public class AdsController {
     @PostMapping("/{id}/comments")
     public ResponseEntity<CommentDTO> addComment(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
-            @RequestBody CreateOrUpdateCommentDTO comment
+            @RequestBody CreateOrUpdateCommentDTO comment,
+            Authentication authentication
     ) {
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        Comment addedComment = commentService.addCommentToAdByItsId(id, authentication.getName(), comment);
 
-        CommentDTO addedComment = CommentDTO.builder()
-                .author(id)
-                .authorImage("")
-                .authorFirstName("")
-                .createdAt(Calendar.getInstance().getTimeInMillis())
-                .pk(0)
-                .text(comment.getText())
-                .build();
-
-        return ResponseEntity.ok(addedComment);
+        return ResponseEntity.ok(commentMapper.commentToCommentDTO(addedComment));
     }
 
     @Operation(
@@ -203,23 +200,7 @@ public class AdsController {
     public ResponseEntity<ExtendedAdDTO> getAds(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id
     ) {
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        ExtendedAdDTO foundedAd = ExtendedAdDTO.builder()
-                .pk(0)
-                .authorFirstName("")
-                .authorLastName("")
-                .description("")
-                .email("")
-                .image("")
-                .phone("")
-                .price(0)
-                .title("")
-                .build();
-
-        return ResponseEntity.ok(foundedAd);
+        return adsService.getExtendedAdInfo(id);
     }
 
     @Operation(
@@ -251,27 +232,10 @@ public class AdsController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<?> removeAd(
-            @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id
+            @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
+            Authentication authentication
     ) {
-        if (id <= 0) {
-            return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
-        }
-
-        boolean adExist = true;
-
-        if (adExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorAd = false;
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return ResponseEntity.status(adsService.deleteAdById(id, authentication)).build();
     }
 
     @Operation(
@@ -307,31 +271,10 @@ public class AdsController {
     @PatchMapping("/{id}")
     public ResponseEntity<AdDTO> updateAds(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
-            @RequestBody CreateOrUpdateAdDTO ad
+            @RequestBody CreateOrUpdateAdDTO ad,
+            Authentication authentication
     ) {
-        boolean adExist = true;
-
-        if (adExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorAd = false;
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                AdDTO editedAd = AdDTO.builder()
-                        .author(0)
-                        .image("")
-                        .pk(0)
-                        .price(ad.getPrice())
-                        .title(ad.getTitle())
-                        .build();
-
-                return ResponseEntity.ok(editedAd);
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return adsService.updateAdById(id, ad, authentication.getName());
     }
 
     @Operation(
@@ -364,27 +307,12 @@ public class AdsController {
     @DeleteMapping("/{adId}/comments/{commentId}")
     public ResponseEntity<?> deleteComment(
             @Parameter(name = "adId", description = "Identifier of ad") @PathVariable Integer adId,
-            @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId
+            @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId,
+            Authentication authentication
     ) {
-        if (adId <= 0 || commentId <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        boolean commentExist = true;
-
-        if (commentExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorComment = false;
-            boolean userHasPermit = isAuthorComment || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return ResponseEntity.status(
+                commentService.deleteAdCommentByItsId(adId, commentId, authentication.getName())
+        ).build();
     }
 
     @Operation(
@@ -421,36 +349,10 @@ public class AdsController {
     public ResponseEntity<CommentDTO> updateComment(
             @Parameter(name = "adId", description = "Identifier of ad") @PathVariable Integer adId,
             @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId,
-            @RequestBody CreateOrUpdateCommentDTO comment
+            @RequestBody CreateOrUpdateCommentDTO comment,
+            Authentication authentication
     ) {
-        if (adId <= 0 || commentId <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        boolean commentExist = true;
-
-        if (commentExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorComment = false;
-            boolean userHasPermit = isAuthorComment || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                CommentDTO editedComment = CommentDTO.builder()
-                        .author(0)
-                        .authorImage("")
-                        .authorFirstName("")
-                        .createdAt(Calendar.getInstance().getTimeInMillis())
-                        .pk(0)
-                        .text(comment.getText())
-                        .build();
-
-                return ResponseEntity.ok(editedComment);
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return commentService.updateAdCommentByItsId(adId, commentId, comment, authentication.getName());
     }
 
     @Operation(
@@ -474,15 +376,17 @@ public class AdsController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<AdsDTO> getAdsMe() {
-        List<AdDTO> usersAds = List.of();
+    public ResponseEntity<AdsDTO> getAdsMe(Authentication authentication) {
+        List<AdDTO> ads = adsService.getUsersAds(authentication.getName()).stream()
+                .map(adMapper::adToAdDTO)
+                .collect(Collectors.toList());
 
-        AdsDTO ads = AdsDTO.builder()
-                .count(usersAds.size())
-                .results(usersAds)
-                .build();
-
-        return ResponseEntity.ok(ads);
+        return ResponseEntity.ok(
+                AdsDTO.builder()
+                        .count(ads.size())
+                        .results(ads)
+                        .build()
+        );
     }
 
     @Operation(
@@ -516,30 +420,12 @@ public class AdsController {
             }
     )
     @PatchMapping(value = "/{id}/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<byte[]> updateUserImage(
+    public ResponseEntity<byte[]> updateAdImage(
             @Parameter(name = "id", description = "Identifier of ad") @PathVariable Integer id,
-            @RequestParam MultipartFile image
+            @RequestParam MultipartFile image,
+            Authentication authentication
     ) throws IOException {
-        boolean adExist = true;
-
-        if (adExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorAd = false;
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                HttpHeaders headers = new HttpHeaders();
-
-                headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-                headers.setContentLength(image.getSize());
-
-                return ResponseEntity.status(HttpStatus.OK).headers(headers).body(image.getBytes());
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return adsService.updateAdImageById(id, image, authentication.getName());
     }
 
 }
