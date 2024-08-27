@@ -3,13 +3,16 @@ package ru.skypro.homework.model;
 import lombok.*;
 
 import javax.persistence.*;
+import java.awt.*;
 import java.util.Objects;
 
 @Entity
 @Table(name = "ads")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Ad {
 
     @Id
@@ -20,9 +23,6 @@ public class Ad {
     private String description;
     @ManyToOne(fetch = FetchType.LAZY)
     private User user;
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "image_id", referencedColumnName = "id")
-    private AdImage image;
 
     @Override
     public boolean equals(Object o) {
@@ -32,12 +32,11 @@ public class Ad {
         return Objects.equals(price, ad.price)
                 && Objects.equals(title, ad.title)
                 && Objects.equals(description, ad.description)
-                && Objects.equals(user, ad.user)
-                && Objects.equals(image, ad.image);
+                && Objects.equals(user, ad.user);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(price, title, description, user, image);
+        return Objects.hash(price, title, description, user);
     }
 }

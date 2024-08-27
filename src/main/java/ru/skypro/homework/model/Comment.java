@@ -1,8 +1,6 @@
 package ru.skypro.homework.model;
 
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -11,8 +9,10 @@ import java.util.Objects;
 @Entity
 @Table(name = "comments")
 @NoArgsConstructor
+@AllArgsConstructor
 @Getter
 @Setter
+@Builder
 public class Comment {
 
     @Id

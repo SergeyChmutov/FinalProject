@@ -28,7 +28,7 @@ public class AdsUserDetailsService implements UserDetailsManager {
 
     @Override
     public void createUser(UserDetails user) {
-        repository.save(userMapper.UserDetailsToUser(user));
+        repository.save(userMapper.userDetailsToUser(user));
     }
 
     @Override

@@ -5,24 +5,33 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.AllArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.NewPasswordDTO;
 import ru.skypro.homework.dto.UpdateUserDTO;
 import ru.skypro.homework.dto.UserDTO;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.model.User;
+import ru.skypro.homework.service.UserAvatarService;
+import ru.skypro.homework.service.UserService;
 
 import java.io.IOException;
 
 @Slf4j
-@RequiredArgsConstructor
+@CrossOrigin(origins = "http://localhost:3000")
+@AllArgsConstructor
 @RestController
 @RequestMapping("/users")
 public class UsersController {
+
+    private final UserMapper userMapper;
+    private final UserService userService;
+    private final UserAvatarService userAvatarService;
 
     @Operation(
             tags = "Users",
@@ -51,14 +60,14 @@ public class UsersController {
             }
     )
     @PostMapping("/set_password")
-    public ResponseEntity setPassword(@RequestBody NewPasswordDTO newPassword) {
+    public ResponseEntity setPassword(@RequestBody NewPasswordDTO newPassword, Authentication authentication) {
         log.info("New password: {}", newPassword);
 
-        if (false) {
-            return ResponseEntity.ok().build();
-        } else {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
+        return userService.changeUserPassword(
+                authentication.getName(),
+                newPassword.getCurrentPassword(),
+                newPassword.getNewPassword()
+        );
     }
 
     @Operation(
@@ -82,8 +91,10 @@ public class UsersController {
             }
     )
     @GetMapping("/me")
-    public ResponseEntity<UserDTO> getUser() {
-        return ResponseEntity.ok(new UserDTO());
+    public ResponseEntity<UserDTO> getUser(Authentication authentication) {
+        User user = userService.findUserByEmail(authentication.getName());
+
+        return ResponseEntity.ok(userMapper.userToUserDTO(user));
     }
 
     @Operation(
@@ -111,8 +122,16 @@ public class UsersController {
             }
     )
     @PatchMapping("/me")
-    public ResponseEntity<UpdateUserDTO> updateUser(@RequestBody UpdateUserDTO updateUser) {
-        return ResponseEntity.ok(updateUser);
+    public ResponseEntity<UpdateUserDTO> updateUser(
+            @RequestBody UpdateUserDTO updateUser,
+            Authentication authentication
+    ) {
+        User user = userMapper.updateUserDTOToUser(updateUser);
+        user.setEmail(authentication.getName());
+
+        userService.updateUserInfo(user);
+
+        return ResponseEntity.ok().build();
     }
 
     @Operation(
@@ -137,7 +156,12 @@ public class UsersController {
             }
     )
     @PatchMapping(value = "/me/image", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity updateUserImage(@RequestParam MultipartFile image) throws IOException {
+    public ResponseEntity updateUserImage(
+            @RequestParam MultipartFile image,
+            Authentication authentication
+    ) throws IOException {
+        userAvatarService.saveUserAvatar(authentication.getName(), image);
+
         return ResponseEntity.ok().build();
     }
 

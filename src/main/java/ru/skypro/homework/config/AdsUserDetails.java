@@ -16,7 +16,7 @@ public class AdsUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority("ROLE_" + user.getRole().name());
+        SimpleGrantedAuthority grantedAuthority = new SimpleGrantedAuthority(user.getRole().name());
         return List.of(grantedAuthority);
     }
 
@@ -49,4 +49,5 @@ public class AdsUserDetails implements UserDetails {
     public boolean isEnabled() {
         return true;
     }
+
 }
