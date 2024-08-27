@@ -92,7 +92,7 @@ public class AdsServiceImpl implements AdsService {
             Ad ad = getAdById(id);
 
             Role userRole = user.getRole();
-            boolean isAuthorAd = (ad.getUser() == user);
+            boolean isAuthorAd = (ad.getUser().equals(user));
             boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
 
             if (userHasPermit) {
@@ -114,7 +114,7 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.findUserByEmail(username);
 
         Role userRole = user.getRole();
-        boolean isAuthorAd = (foundedAd.getUser() == user);
+        boolean isAuthorAd = (foundedAd.getUser().equals(user));
         boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
 
         if (userHasPermit) {
@@ -138,7 +138,7 @@ public class AdsServiceImpl implements AdsService {
         User user = userService.findUserByEmail(username);
 
         Role userRole = user.getRole();
-        boolean isAuthorAd = (foundedAd.getUser() == user);
+        boolean isAuthorAd = (foundedAd.getUser().equals(user));
         boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
 
         if (userHasPermit) {

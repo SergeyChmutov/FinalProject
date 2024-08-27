@@ -7,8 +7,6 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -16,16 +14,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.skypro.homework.dto.*;
-import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.mapper.CommentMapper;
-import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.service.AdsService;
 import ru.skypro.homework.service.CommentService;
 
 import java.io.IOException;
-import java.util.Calendar;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -315,26 +310,9 @@ public class AdsController {
             @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId,
             Authentication authentication
     ) {
-        if (adId <= 0 || commentId <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        boolean commentExist = true;
-
-        if (commentExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorComment = false;
-            boolean userHasPermit = isAuthorComment || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                return ResponseEntity.ok().build();
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
+        return ResponseEntity.status(
+                commentService.deleteAdCommentByItsId(adId, commentId, authentication.getName())
+        ).build();
     }
 
     @Operation(
@@ -371,36 +349,10 @@ public class AdsController {
     public ResponseEntity<CommentDTO> updateComment(
             @Parameter(name = "adId", description = "Identifier of ad") @PathVariable Integer adId,
             @Parameter(name = "commentId", description = "Identifier of comment") @PathVariable Integer commentId,
-            @RequestBody CreateOrUpdateCommentDTO comment
+            @RequestBody CreateOrUpdateCommentDTO comment,
+            Authentication authentication
     ) {
-        if (adId <= 0 || commentId <= 0) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
-
-        boolean commentExist = true;
-
-        if (commentExist) {
-            Role userRole = Role.ADMIN;
-            boolean isAuthorComment = false;
-            boolean userHasPermit = isAuthorComment || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                CommentDTO editedComment = CommentDTO.builder()
-                        .author(0)
-                        .authorImage("")
-                        .authorFirstName("")
-                        .createdAt(Calendar.getInstance().getTimeInMillis())
-                        .pk(0)
-                        .text(comment.getText())
-                        .build();
-
-                return ResponseEntity.ok(editedComment);
-            } else {
-                return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-            }
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
+        return commentService.updateAdCommentByItsId(adId, commentId, comment, authentication.getName());
     }
 
     @Operation(

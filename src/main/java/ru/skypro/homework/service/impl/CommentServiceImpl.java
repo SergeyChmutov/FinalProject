@@ -2,8 +2,10 @@ package ru.skypro.homework.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.skypro.homework.dto.CommentDTO;
 import ru.skypro.homework.dto.CreateOrUpdateCommentDTO;
 import ru.skypro.homework.enums.Role;
 import ru.skypro.homework.exception.AdsCommentNotFoundException;
@@ -69,8 +71,43 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
+    @Override
+    public ResponseEntity<CommentDTO> updateAdCommentByItsId(
+            Integer adId,
+            Integer commentId,
+            CreateOrUpdateCommentDTO commentDTO,
+            String username
+    ) {
+        Ad foundAd = adsService.getAdById(adId);
+        Comment foundComment = findCommentById(commentId);
+
+        if (!foundComment.getAd().equals(foundAd)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User foundUser = userService.findUserByEmail(username);
+        Role userRole = foundUser.getRole();
+        boolean isCommentAuthor = (foundComment.getUser() == foundUser);
+        boolean userHasPermit = (isCommentAuthor || userRole == Role.ADMIN);
+
+        if (userHasPermit) {
+            Comment updateComment = commentMapper.createOrUpdateCommentDTOToComment(commentDTO);
+
+            foundComment.setText(updateComment.getText());
+            foundComment.setUser(foundUser);
+            foundComment.setCreatedAt(updateComment.getCreatedAt());
+
+            Comment savedComment = commentRepository.save(foundComment);
+
+            return ResponseEntity.ok(commentMapper.commentToCommentDTO(savedComment));
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+    }
+
     private Comment findCommentById(Integer id) {
         return commentRepository.findByPk(id)
                 .orElseThrow(() -> new AdsCommentNotFoundException("Comment with id " + id + " not found."));
     }
+
 }
