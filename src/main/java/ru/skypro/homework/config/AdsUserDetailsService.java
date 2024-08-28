@@ -16,7 +16,6 @@ import java.util.Optional;
 public class AdsUserDetailsService implements UserDetailsManager {
 
     private UserRepository repository;
-    private UserMapper userMapper;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -28,7 +27,7 @@ public class AdsUserDetailsService implements UserDetailsManager {
 
     @Override
     public void createUser(UserDetails user) {
-        repository.save(userMapper.userDetailsToUser(user));
+
     }
 
     @Override

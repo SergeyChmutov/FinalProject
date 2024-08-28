@@ -1,55 +1,48 @@
 package ru.skypro.homework.service.impl;
 
-import lombok.AllArgsConstructor;
-import org.springframework.security.core.userdetails.User;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.RegisterDTO;
+import ru.skypro.homework.mapper.UserMapper;
+import ru.skypro.homework.model.User;
 import ru.skypro.homework.service.AuthService;
 import ru.skypro.homework.service.UserService;
 
 @Service
-@AllArgsConstructor
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
 
     private final UserDetailsManager manager;
     private final PasswordEncoder encoder;
     private final UserService userService;
+    private final UserMapper userMapper;
 
     @Override
     public boolean login(String userName, String password) {
-        if (!manager.userExists(userName)) {
+        final String usernameLowerCase = userName.toLowerCase();
+
+        if (!manager.userExists(usernameLowerCase)) {
             return false;
         }
-        UserDetails userDetails = manager.loadUserByUsername(userName);
+        UserDetails userDetails = manager.loadUserByUsername(usernameLowerCase);
+
         return encoder.matches(password, userDetails.getPassword());
     }
 
     @Override
-    @Transactional
     public boolean register(RegisterDTO register) {
-        if (manager.userExists(register.getUserName())) {
+        final User user = userMapper.registerDTOToUser(register);
+
+        if (manager.userExists(user.getEmail())) {
             return false;
         }
 
-        manager.createUser(
-                User.builder()
-                        .passwordEncoder(this.encoder::encode)
-                        .password(register.getPassword())
-                        .username(register.getUserName())
-                        .roles(register.getRole().name())
-                        .build());
+        user.setPassword(encoder.encode(user.getPassword()));
 
-        ru.skypro.homework.model.User createdUser = userService.findUserByEmail(register.getUserName());
-
-        createdUser.setFirstName(register.getFirstName());
-        createdUser.setLastName(register.getLastName());
-        createdUser.setPhone(register.getPhone());
-
-        userService.saveUser(createdUser);
+        userService.saveUser(user);
 
         return true;
     }

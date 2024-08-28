@@ -26,7 +26,7 @@ CREATE TABLE avatars
 
     CONSTRAINT avatars_pkey PRIMARY KEY (id),
     CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
-        REFERENCES avatars (id)
+        REFERENCES users (id)
 );
 
 -- changeset Sergey Chmutov:3

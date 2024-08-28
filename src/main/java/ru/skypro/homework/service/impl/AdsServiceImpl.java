@@ -135,11 +135,11 @@ public class AdsServiceImpl implements AdsService {
     @Override
     public ResponseEntity<byte[]> updateAdImageById(Integer id, MultipartFile image, String username) throws IOException {
         Ad foundedAd = getAdById(id);
-        User user = userService.findUserByEmail(username);
+        User user = foundedAd.getUser();
 
         Role userRole = user.getRole();
-        boolean isAuthorAd = (foundedAd.getUser().equals(user));
-        boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
+        boolean isAuthorAd = (user.getEmail().equals(username));
+        boolean userHasPermit = isAuthorAd;
 
         if (userHasPermit) {
             AdImage updatedImage = adImageService.createAdImage(foundedAd, image);
