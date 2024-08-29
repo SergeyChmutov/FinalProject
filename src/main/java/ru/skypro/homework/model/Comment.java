@@ -22,9 +22,10 @@ public class Comment {
     private Date createdAt;
     private String text;
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id")
     private User user;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ad_id")
+    @JoinColumn(name = "ad_pk")
     private Ad ad;
 
     @Override

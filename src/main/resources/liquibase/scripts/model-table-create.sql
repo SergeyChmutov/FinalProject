@@ -80,14 +80,14 @@ CREATE TABLE comments
     pk serial NOT NULL,
     created_at timestamp without time zone NOT NULL,
     text character varying(64) NOT NULL,
-    ad_id integer NOT NULL,
+    ad_pk integer NOT NULL,
     user_id integer NOT NULL,
 
     CONSTRAINT comments_pkey PRIMARY KEY (pk),
     CONSTRAINT user_id_fkey FOREIGN KEY (user_id)
         REFERENCES users (id)
         ON DELETE CASCADE,
-    CONSTRAINT ad_id_fkey FOREIGN KEY (ad_id)
+    CONSTRAINT ad_pk_fkey FOREIGN KEY (ad_pk)
         REFERENCES ads (pk)
         ON DELETE CASCADE
 );

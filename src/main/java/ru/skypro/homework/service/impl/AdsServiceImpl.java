@@ -6,7 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +18,7 @@ import ru.skypro.homework.exception.AdsAdNotFoundException;
 import ru.skypro.homework.mapper.AdMapper;
 import ru.skypro.homework.model.Ad;
 import ru.skypro.homework.model.AdImage;
+import ru.skypro.homework.model.Comment;
 import ru.skypro.homework.model.User;
 import ru.skypro.homework.repository.AdRepository;
 import ru.skypro.homework.service.AdImageService;
@@ -78,46 +79,28 @@ public class AdsServiceImpl implements AdsService {
 
     @Override
     public Ad getAdById(Integer id) {
-        Ad ad = adRepository.findById(id)
+        return adRepository.findById(id)
                 .orElseThrow(() -> new AdsAdNotFoundException("Ad with id " + id + " not found."));
-
-        return ad;
     }
 
     @Override
     @Transactional
     public HttpStatus deleteAdById(Integer id, Authentication authentication) {
-        try {
-            User user = userService.findUserByEmail(authentication.getName());
-            Ad ad = getAdById(id);
+        Ad foundedAd = getAdById(id);
 
-            Role userRole = user.getRole();
-            boolean isAuthorAd = (ad.getUser().equals(user));
-            boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-            if (userHasPermit) {
-                adRepository.delete(id);
-                return HttpStatus.OK;
-            } else {
-                return HttpStatus.FORBIDDEN;
-            }
-        } catch (UsernameNotFoundException e) {
+        if (userHasAdminRoleOrIsAuthorAd(foundedAd, authentication)) {
+            adRepository.delete(id);
             return HttpStatus.NO_CONTENT;
-        } catch (AdsAdNotFoundException e) {
-            return HttpStatus.NOT_FOUND;
+        } else {
+            return HttpStatus.FORBIDDEN;
         }
     }
 
     @Override
-    public ResponseEntity<AdDTO> updateAdById(Integer id, CreateOrUpdateAdDTO ad, String username) {
+    public ResponseEntity<AdDTO> updateAdById(Integer id, CreateOrUpdateAdDTO ad, Authentication authentication) {
         Ad foundedAd = getAdById(id);
-        User user = userService.findUserByEmail(username);
 
-        Role userRole = user.getRole();
-        boolean isAuthorAd = (foundedAd.getUser().equals(user));
-        boolean userHasPermit = isAuthorAd || userRole == Role.ADMIN;
-
-        if (userHasPermit) {
+        if (userHasAdminRoleOrIsAuthorAd(foundedAd, authentication)) {
             Ad adFromAdDTO = adMapper.createOrUpdateAdDTOToAd(ad);
 
             foundedAd.setPrice(adFromAdDTO.getPrice());
@@ -133,15 +116,14 @@ public class AdsServiceImpl implements AdsService {
     }
 
     @Override
-    public ResponseEntity<byte[]> updateAdImageById(Integer id, MultipartFile image, String username) throws IOException {
+    public ResponseEntity<byte[]> updateAdImageById(
+            Integer id,
+            MultipartFile image,
+            Authentication authentication
+    ) throws IOException {
         Ad foundedAd = getAdById(id);
-        User user = foundedAd.getUser();
 
-        Role userRole = user.getRole();
-        boolean isAuthorAd = (user.getEmail().equals(username));
-        boolean userHasPermit = isAuthorAd;
-
-        if (userHasPermit) {
+        if (userHasAdminRoleOrIsAuthorAd(foundedAd, authentication)) {
             AdImage updatedImage = adImageService.createAdImage(foundedAd, image);
             HttpHeaders headers = new HttpHeaders();
 
@@ -152,6 +134,19 @@ public class AdsServiceImpl implements AdsService {
         } else {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+    }
+
+    private boolean userHasAdminRoleOrIsAuthorAd(Ad ad, Authentication authentication) {
+        SimpleGrantedAuthority adminGrantedAuthority = new SimpleGrantedAuthority(Role.ADMIN.name());
+        boolean userHasPermit = authentication.getAuthorities()
+                .contains(adminGrantedAuthority);
+
+        if (!userHasPermit) {
+            userHasPermit = ad.getUser()
+                    .getEmail().equals(authentication.getName().toLowerCase());
+        }
+
+        return userHasPermit;
     }
 
 }

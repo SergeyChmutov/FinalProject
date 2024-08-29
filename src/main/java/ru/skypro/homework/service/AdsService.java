@@ -26,8 +26,11 @@ public interface AdsService {
 
     HttpStatus deleteAdById(Integer id, Authentication authentication);
 
-    ResponseEntity<AdDTO> updateAdById(Integer id, CreateOrUpdateAdDTO ad, String username);
+    ResponseEntity<AdDTO> updateAdById(Integer id, CreateOrUpdateAdDTO ad, Authentication authentication);
 
-    ResponseEntity<byte[]> updateAdImageById(Integer id, MultipartFile image, String username) throws IOException;
+    ResponseEntity<byte[]> updateAdImageById(
+            Integer id, MultipartFile image,
+            Authentication authentication
+    ) throws IOException;
 
 }

@@ -166,7 +166,7 @@ public class AdsController {
             @RequestBody CreateOrUpdateCommentDTO comment,
             Authentication authentication
     ) {
-        Comment addedComment = commentService.addCommentToAdByItsId(id, authentication.getName(), comment);
+        Comment addedComment = commentService.addCommentToAdById(id, authentication.getName(), comment);
 
         return ResponseEntity.ok(commentMapper.commentToCommentDTO(addedComment));
     }
@@ -274,7 +274,7 @@ public class AdsController {
             @RequestBody CreateOrUpdateAdDTO ad,
             Authentication authentication
     ) {
-        return adsService.updateAdById(id, ad, authentication.getName());
+        return adsService.updateAdById(id, ad, authentication);
     }
 
     @Operation(
@@ -311,7 +311,7 @@ public class AdsController {
             Authentication authentication
     ) {
         return ResponseEntity.status(
-                commentService.deleteAdCommentByItsId(adId, commentId, authentication.getName())
+                commentService.deleteAdCommentById(adId, commentId, authentication)
         ).build();
     }
 
@@ -352,7 +352,7 @@ public class AdsController {
             @RequestBody CreateOrUpdateCommentDTO comment,
             Authentication authentication
     ) {
-        return commentService.updateAdCommentByItsId(adId, commentId, comment, authentication.getName());
+        return commentService.updateAdCommentById(adId, commentId, comment, authentication);
     }
 
     @Operation(
@@ -425,7 +425,7 @@ public class AdsController {
             @RequestParam MultipartFile image,
             Authentication authentication
     ) throws IOException {
-        return adsService.updateAdImageById(id, image, authentication.getName());
+        return adsService.updateAdImageById(id, image, authentication);
     }
 
 }

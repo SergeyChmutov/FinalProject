@@ -3,6 +3,8 @@ package ru.skypro.homework.service.impl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.skypro.homework.dto.CommentDTO;
@@ -37,7 +39,8 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public Comment addCommentToAdByItsId(Integer id, String username, CreateOrUpdateCommentDTO commentDTO) {
+    @Transactional
+    public Comment addCommentToAdById(Integer id, String username, CreateOrUpdateCommentDTO commentDTO) {
         Ad ad = adsService.getAdById(id);
         User user = userService.findUserByEmail(username);
 
@@ -50,20 +53,15 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     @Transactional
-    public HttpStatus deleteAdCommentByItsId(Integer adId, Integer commentId, String username) {
-        Ad foundAd = adsService.getAdById(adId);
-        Comment foundComment = findCommentById(commentId);
+    public HttpStatus deleteAdCommentById(Integer adId, Integer commentId,Authentication authentication) {
+        Comment foundComment = getCommentById(commentId);
+        Ad ad = foundComment.getAd();
 
-        if (!foundComment.getAd().equals(foundAd)) {
+        if (!ad.getPk().equals(adId)) {
             return HttpStatus.NOT_FOUND;
         }
 
-        User foundUser = userService.findUserByEmail(username);
-        Role userRole = foundUser.getRole();
-        boolean isCommentAuthor = (foundComment.getUser() == foundUser);
-        boolean userHasPermit = (isCommentAuthor || userRole == Role.ADMIN);
-
-        if (userHasPermit) {
+        if (userHasAdminRoleOrIsAuthorComment(foundComment, authentication)) {
             commentRepository.delete(commentId);
             return HttpStatus.OK;
         } else {
@@ -72,29 +70,25 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    public ResponseEntity<CommentDTO> updateAdCommentByItsId(
+    @Transactional
+    public ResponseEntity<CommentDTO> updateAdCommentById(
             Integer adId,
             Integer commentId,
             CreateOrUpdateCommentDTO commentDTO,
-            String username
+            Authentication authentication
     ) {
-        Ad foundAd = adsService.getAdById(adId);
-        Comment foundComment = findCommentById(commentId);
+        Comment foundComment = getCommentById(commentId);
+        Ad ad = foundComment.getAd();
 
-        if (!foundComment.getAd().equals(foundAd)) {
+        if (!ad.getPk().equals(adId)) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        User foundUser = userService.findUserByEmail(username);
-        Role userRole = foundUser.getRole();
-        boolean isCommentAuthor = (foundComment.getUser() == foundUser);
-        boolean userHasPermit = (isCommentAuthor || userRole == Role.ADMIN);
-
-        if (userHasPermit) {
+        if (userHasAdminRoleOrIsAuthorComment(foundComment, authentication)) {
             Comment updateComment = commentMapper.createOrUpdateCommentDTOToComment(commentDTO);
 
             foundComment.setText(updateComment.getText());
-            foundComment.setUser(foundUser);
+            foundComment.setUser(userService.findUserByEmail(authentication.getName().toLowerCase()));
             foundComment.setCreatedAt(updateComment.getCreatedAt());
 
             Comment savedComment = commentRepository.save(foundComment);
@@ -105,9 +99,22 @@ public class CommentServiceImpl implements CommentService {
         }
     }
 
-    private Comment findCommentById(Integer id) {
+    private Comment getCommentById(Integer id) {
         return commentRepository.findByPk(id)
                 .orElseThrow(() -> new AdsCommentNotFoundException("Comment with id " + id + " not found."));
+    }
+
+    private boolean userHasAdminRoleOrIsAuthorComment(Comment comment, Authentication authentication) {
+        SimpleGrantedAuthority adminGrantedAuthority = new SimpleGrantedAuthority(Role.ADMIN.name());
+        boolean userHasPermit = authentication.getAuthorities()
+                .contains(adminGrantedAuthority);
+
+        if (!userHasPermit) {
+            userHasPermit = comment.getUser()
+                    .getEmail().equals(authentication.getName().toLowerCase());
+        }
+
+        return userHasPermit;
     }
 
 }

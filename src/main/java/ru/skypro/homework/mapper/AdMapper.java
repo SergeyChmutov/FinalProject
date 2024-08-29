@@ -33,6 +33,7 @@ public interface AdMapper {
             @Mapping(target = "authorFirstName", expression = "java(ad.getUser().getFirstName())"),
             @Mapping(target = "authorLastName", expression = "java(ad.getUser().getLastName())"),
             @Mapping(target = "email", expression = "java(ad.getUser().getEmail())"),
+            @Mapping(target = "phone", expression = "java(ad.getUser().getPhone())"),
             @Mapping(target = "image", expression = """
                     java("/images/" + ad.getPk())
                     """)
