@@ -31,10 +31,7 @@ public class AdImageServiceImpl implements AdImageService {
 
     @Override
     public AdImage createAdImage(Ad ad, MultipartFile image) throws IOException {
-        final Path filePath = Path.of(
-                imagesFolder,
-                ad.getPk() + "." + getExtension(image.getOriginalFilename())
-        );
+        final Path filePath = Path.of(imagesFolder, ad.getPk() + ".ads");
 
         Files.createDirectories(filePath.getParent());
         Files.deleteIfExists(filePath);
@@ -79,10 +76,6 @@ public class AdImageServiceImpl implements AdImageService {
             response.setContentLength((int) adImage.getFileSize());
             is.transferTo(os);
         }
-    }
-
-    private String getExtension(String fileName) {
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
     }
 
 }
