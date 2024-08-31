@@ -19,7 +19,7 @@ public class AdsUserDetailsService implements UserDetailsManager {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<User> user = repository.findByEmail(username);
+        Optional<User> user = repository.findByEmail(username.toLowerCase());
 
         return user.map(AdsUserDetails::new)
                 .orElseThrow(() -> new UsernameNotFoundException(username + " not found."));
